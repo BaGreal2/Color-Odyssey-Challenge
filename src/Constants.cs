@@ -18,5 +18,13 @@ namespace COC
     public static readonly Color MenuTextColor = new Color(0xFA, 0xFA, 0xFA, 255);
     public static readonly Color TitleColor = new Color(0xFA, 0xCF, 0xAD, 255);
     public static readonly Color BoxColor = new Color(0xF8, 0xBD, 0x7F, 255);
+
+    public static readonly Color Red = new Color(0xD9, 0x5A, 0x40, 255);
+    public static readonly Color Green = new Color(0x76, 0x9F, 0x72, 255);
+    public static readonly Color Blue = new Color(0x69, 0xA5, 0xB6, 255);
+    public static readonly Color Orange = new Color(0xF4, 0x87, 0x4C, 255);
+    public static readonly Color Brown = new Color(0x8C, 0x6A, 0x48, 255);
+    public static readonly Color Gray = new Color(0x94, 0xA1, 0xA4, 255);
+    public static readonly Color Yellow = new Color(0xF6, 0xD9, 0x6F, 255);
   }
 }

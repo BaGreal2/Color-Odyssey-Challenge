@@ -176,18 +176,18 @@ namespace COC
       Vector2 spacing = new Vector2(0, 24);
       Vector2 textPosition = new Vector2(leftMargin, 100);
 
-      UI.DrawTextLeft("1. The program draws the codes of four colors chosen from among six:", textPosition, 20, letterSpacing, Constants.MenuTextColor, customFont);
-      UI.DrawTextLeft("   R: Red", textPosition + spacing, 20, letterSpacing, Constants.Red, customFont);
-      UI.DrawTextLeft("   G: Green", textPosition + spacing * 2, 20, letterSpacing, Constants.Green, customFont);
-      UI.DrawTextLeft("   B: Blue", textPosition + spacing * 3, 20, letterSpacing, Constants.Blue, customFont);
-      UI.DrawTextLeft("   O: Orange", textPosition + spacing * 4, 20, letterSpacing, Constants.Orange, customFont);
-      UI.DrawTextLeft("   C: Brown", textPosition + spacing * 5, 20, letterSpacing, Constants.Brown, customFont);
-      UI.DrawTextLeft("   A: Gray", textPosition + spacing * 6, 20, letterSpacing, Constants.Gray, customFont);
-      UI.DrawTextLeft("2. The player enters his code. The program informs the player:", textPosition + spacing * 7, 20, letterSpacing, Constants.MenuTextColor, customFont);
-      UI.DrawTextLeft("   Yellow border: color matches but position does not match", textPosition + spacing * 8, 20, letterSpacing, Constants.Yellow, customFont);
-      UI.DrawTextLeft("   Green border: both color and position match.", textPosition + spacing * 9, 20, letterSpacing, Constants.Green, customFont);
-      UI.DrawTextLeft("3. If you get 4 green borders - you win.", textPosition + spacing * 10, 20, letterSpacing, Constants.MenuTextColor, customFont);
-      UI.DrawTextLeft("4. If you made a 6 attempt to guess the color code - you lose.", textPosition + spacing * 11, 20, letterSpacing, Constants.MenuTextColor, customFont);
+      UI.DrawTextLeft("1. The program draws the codes of four colors chosen from among six:", textPosition, 24, letterSpacing, Constants.MenuTextColor, customFont);
+      UI.DrawTextLeft("   R: Red", textPosition + spacing, 24, letterSpacing, Constants.Red, customFont);
+      UI.DrawTextLeft("   G: Green", textPosition + spacing * 2, 24, letterSpacing, Constants.Green, customFont);
+      UI.DrawTextLeft("   B: Blue", textPosition + spacing * 3, 24, letterSpacing, Constants.Blue, customFont);
+      UI.DrawTextLeft("   O: Orange", textPosition + spacing * 4, 24, letterSpacing, Constants.Orange, customFont);
+      UI.DrawTextLeft("   C: Brown", textPosition + spacing * 5, 24, letterSpacing, Constants.Brown, customFont);
+      UI.DrawTextLeft("   A: Gray", textPosition + spacing * 6, 24, letterSpacing, Constants.Gray, customFont);
+      UI.DrawTextLeft("2. The player enters his code. The program informs the player:", textPosition + spacing * 7, 24, letterSpacing, Constants.MenuTextColor, customFont);
+      UI.DrawTextLeft("   Yellow border: color matches but position does not match", textPosition + spacing * 8, 24, letterSpacing, Constants.Yellow, customFont);
+      UI.DrawTextLeft("   Green border: both color and position match.", textPosition + spacing * 9, 24, letterSpacing, Constants.Green, customFont);
+      UI.DrawTextLeft("3. If you get 4 green borders - you win.", textPosition + spacing * 10, 24, letterSpacing, Constants.MenuTextColor, customFont);
+      UI.DrawTextLeft("4. If you made a 6 attempt to guess the color code - you lose.", textPosition + spacing * 11, 24, letterSpacing, Constants.MenuTextColor, customFont);
 
       Vector2 backButtonSize = new Vector2(200, 50);
       Vector2 backButtonPosition = new Vector2(width / 2 - (backButtonSize.X) / 2, height - backButtonSize.Y - 50);
@@ -210,10 +210,54 @@ namespace COC
 
       UI.Button("Start Game", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => currentScreen = "game");
       UI.Button("View Rules", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y + menuButtonSize.Y + spacing, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => currentScreen = "rules");
-      UI.Button("Exit", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y + (menuButtonSize.Y + spacing) * 2, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => exitRequested = true);
+      UI.Button("View Stats", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y + (menuButtonSize.Y + spacing) * 2, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => currentScreen = "stats");
+      UI.Button("Exit", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y + (menuButtonSize.Y + spacing) * 3, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => exitRequested = true);
     }
 
-    static void DrawVictoryScreen(Font customFont, CodeManager codeManager)
+    public static void SaveStat(bool isVictory, int attempts = 0)
+    {
+      string path = Constants.StatsPath;
+      string stat = (isVictory ? "V" : "D") + attempts.ToString();
+
+      if (File.Exists(path))
+      {
+        File.AppendAllText(path, stat + Environment.NewLine);
+      }
+      else
+      {
+        File.WriteAllText(path, stat + Environment.NewLine);
+      }
+    }
+
+    public static string ReadStats()
+    {
+      string path = Constants.StatsPath;
+
+      if (File.Exists(path))
+      {
+        string[] stats = File.ReadAllLines(path);
+        int victories = 0;
+        int defeats = 0;
+        int totalAttempts = 0;
+
+        foreach (string stat in stats)
+        {
+          if (stat[0] == 'V')
+          {
+            victories++;
+            totalAttempts += int.Parse(stat.Substring(1));
+          }
+          else
+          {
+            defeats++;
+          }
+        }
+        return stats.Length == 0 ? "" : $"Victories: {victories}\n\nDefeats: {defeats}\n\nAverage attempts to win: {totalAttempts / (float)victories}";
+      }
+      return "";
+    }
+
+    static void DrawVictoryScreen(Font customFont, CodeManager codeManager, int attempts)
     {
       ClearBackground(Constants.BackgroundColor);
 
@@ -222,11 +266,16 @@ namespace COC
 
       UI.DrawTextCentered("You won!", new Vector2(width / 2, 100), 50, 2, Constants.TitleColor, customFont);
       UI.DrawTextCentered($"The code was: {codeManager.Code}", new Vector2(width / 2, 150), 30, 1, Constants.MenuTextColor, customFont);
-      UI.Button("Back to Menu", customFont, new Rectangle(width / 2 - 100, 200, 200, 50), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "menu"; resetRequested = true; });
-      UI.Button("Play Again", customFont, new Rectangle(width / 2 - 100, 260, 200, 50), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "game"; resetRequested = true; });
+
+      int spacing = 20;
+      Vector2 feedbackButtonSize = new Vector2(200, 50);
+      Vector2 feedbackButtonPosition = new Vector2(width / 2 - (feedbackButtonSize.X) / 2, height - feedbackButtonSize.Y * 2 - 50 - spacing);
+
+      UI.Button("Back to Menu", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "menu"; resetRequested = true; SaveStat(true, attempts); });
+      UI.Button("Play Again", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y + feedbackButtonSize.Y + spacing, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "game"; resetRequested = true; SaveStat(true, attempts); });
     }
 
-    static void DrawDefeatScreen(Font customFont, CodeManager codeManager)
+    static void DrawDefeatScreen(Font customFont, CodeManager codeManager, int attempts)
     {
       ClearBackground(Constants.BackgroundColor);
 
@@ -235,8 +284,31 @@ namespace COC
 
       UI.DrawTextCentered("You lost!", new Vector2(width / 2, 100), 50, 2, Constants.TitleColor, customFont);
       UI.DrawTextCentered($"The code was: {codeManager.Code}", new Vector2(width / 2, 150), 30, 1, Constants.MenuTextColor, customFont);
-      UI.Button("Back to Menu", customFont, new Rectangle(width / 2 - 100, 200, 200, 50), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "menu"; resetRequested = true; });
-      UI.Button("Play Again", customFont, new Rectangle(width / 2 - 100, 260, 200, 50), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "game"; resetRequested = true; });
+
+      int spacing = 20;
+      Vector2 feedbackButtonSize = new Vector2(200, 50);
+      Vector2 feedbackButtonPosition = new Vector2(width / 2 - (feedbackButtonSize.X) / 2, height - feedbackButtonSize.Y * 2 - 50 - spacing);
+
+      UI.Button("Back to Menu", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "menu"; resetRequested = true; SaveStat(false); });
+      UI.Button("Play Again", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y + feedbackButtonSize.Y + spacing, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "game"; resetRequested = true; SaveStat(false); });
+    }
+
+    static void DrawStatsScreen(Font customFont)
+    {
+      ClearBackground(Constants.BackgroundColor);
+
+      int width = GetScreenWidth();
+      int height = GetScreenHeight();
+
+      UI.DrawTextCentered("STATISTICS", new Vector2(width / 2, 50), 50, 2, Constants.TitleColor, customFont);
+
+      string stats = ReadStats();
+      UI.DrawTextLeft(stats, new Vector2(50, 100), 24, 1, Constants.MenuTextColor, customFont);
+
+      Vector2 backButtonSize = new Vector2(200, 50);
+      Vector2 backButtonPosition = new Vector2(width / 2 - (backButtonSize.X) / 2, height - backButtonSize.Y - 50);
+
+      UI.Button("Back", customFont, new Rectangle(backButtonPosition.X, backButtonPosition.Y, backButtonSize.X, backButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => currentScreen = "menu");
     }
 
     static void RunGame()
@@ -288,10 +360,13 @@ namespace COC
             DrawRulesScreen(customFont);
             break;
           case "victory":
-            DrawVictoryScreen(customFont, codeManager);
+            DrawVictoryScreen(customFont, codeManager, currentAttempt);
             break;
           case "defeat":
-            DrawDefeatScreen(customFont, codeManager);
+            DrawDefeatScreen(customFont, codeManager, currentAttempt);
+            break;
+          case "stats":
+            DrawStatsScreen(customFont);
             break;
         }
 

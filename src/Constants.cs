@@ -4,8 +4,10 @@ namespace COC
 {
   class Constants
   {
-    public static readonly int WindowWidth = 800;
-    public static readonly int WindowHeight = 600;
+    public const int WindowWidth = 800;
+    public const int WindowHeight = 600;
+
+    public const string StatsPath = "stats.txt";
 
     // #3E4E50
     // #FACFAD

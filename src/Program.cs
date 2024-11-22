@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Reflection;
 using System.Numerics;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
@@ -316,7 +316,17 @@ namespace COC
       InitWindow(Constants.WindowWidth, Constants.WindowHeight, "COC");
       SetTargetFPS(60);
 
-      Font customFont = LoadFontEx("resources/fonts/Poppins/Poppins-Regular.ttf", 90, null, 0);
+      string tempFontPath = Path.Combine(Path.GetTempPath(), "Poppins-Regular.ttf");
+      if (!File.Exists(tempFontPath))
+      {
+        using (Stream fontStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("FinalProject.resources.fonts.Poppins-Regular.ttf"))
+        using (FileStream fileStream = new FileStream(tempFontPath, FileMode.Create, FileAccess.Write))
+        {
+          fontStream.CopyTo(fileStream);
+        }
+      }
+
+      Font customFont = LoadFontEx(tempFontPath, 90, null, 0);
       SetTextureFilter(customFont.Texture, TextureFilter.Bilinear);
 
       string[] userCodes = new string[MaxAttempts];

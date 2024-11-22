@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Raylib-cs" Version="6.1.1" />
+    <EmbeddedResource Include="resources/fonts/*.ttf" />
   </ItemGroup>
 
 </Project>

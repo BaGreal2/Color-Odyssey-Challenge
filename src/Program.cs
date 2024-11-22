@@ -8,18 +8,137 @@ namespace COC
   {
     static string currentScreen = "menu";
     static bool exitRequested = false;
+    static bool resetRequested = false;
+
+    const int MaxLength = 4;
+    const int MaxAttempts = 6;
 
     static void Main(string[] args)
     {
       RunGame();
     }
 
-    static void DrawGameScreen(Font customFont)
+    static Color GetColorFromChar(char c)
+    {
+      Color color;
+
+      switch (c)
+      {
+        case 'R':
+          color = Color.Red;
+          break;
+        case 'G':
+          color = Color.Green;
+          break;
+        case 'B':
+          color = Color.Blue;
+          break;
+        case 'O':
+          color = Color.Orange;
+          break;
+        case 'C':
+          color = Color.Brown;
+          break;
+        case 'A':
+          color = Color.Gray;
+          break;
+        default:
+          color = Color.Black;
+          break;
+      }
+
+      return color;
+    }
+
+    static void DrawGameScreen(Font customFont, ref int currentAttempt, ref string[] userCodes, ref string[] feedback, CodeManager codeManager)
     {
       ClearBackground(Constants.BackgroundColor);
 
       int width = GetScreenWidth();
       int height = GetScreenHeight();
+
+      UI.DrawTextCentered("Enter colors from your keyboard!", new Vector2(width / 2, 80), 50, 2, Constants.TitleColor, customFont);
+
+      // Boxes
+      int spacing = 10;
+      Vector2 boxSize = new Vector2(50, 50);
+      Vector2 boxPosition = new Vector2(width / 2 - (boxSize.X * MaxLength + spacing * (MaxLength - 1)) / 2, 150);
+
+      for (int i = 0; i < MaxAttempts; i++)
+      {
+        for (int j = 0; j < MaxLength; j++)
+        {
+          Color bgColor = Constants.BoxColor;
+          if (feedback[i].Length > j)
+          {
+            switch (feedback[i][j])
+            {
+              case 'X':
+                bgColor = Color.Green;
+                break;
+              case 'Y':
+                bgColor = Color.Yellow;
+                break;
+            }
+          }
+          UI.DrawRoundedRectangle(new Rectangle(boxPosition.X + (boxSize.X + spacing) * j, boxPosition.Y + (boxSize.Y + spacing) * i, boxSize.X, boxSize.Y), 0.2f, 20, bgColor);
+
+          char charToDraw = userCodes[i].Length > j ? userCodes[i][j] : ' ';
+          Color textColor = GetColorFromChar(charToDraw);
+          UI.DrawTextCentered(charToDraw.ToString(), new Vector2(boxPosition.X + (boxSize.X + spacing) * j + boxSize.X / 2, boxPosition.Y + (boxSize.Y + spacing) * i + boxSize.Y / 2), 35, 1, textColor, customFont);
+        }
+      }
+
+      // Color legend
+      int legendSpacing = 24;
+      Vector2 colorLegendPosition = new Vector2(width / 2 - (boxSize.X * MaxLength + spacing * (MaxLength - 1)) / 2 - 130, 150);
+      UI.DrawTextLeft("R: Red", new Vector2(colorLegendPosition.X, colorLegendPosition.Y), 20, 1, Color.Red, customFont);
+      UI.DrawTextLeft("G: Green", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing), 20, 1, Color.Green, customFont);
+      UI.DrawTextLeft("B: Blue", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing * 2), 20, 1, Color.Blue, customFont);
+      UI.DrawTextLeft("O: Orange", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing * 3), 20, 1, Color.Orange, customFont);
+      UI.DrawTextLeft("C: Brown", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing * 4), 20, 1, Color.Brown, customFont);
+      UI.DrawTextLeft("A: Gray", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing * 5), 20, 1, Color.Gray, customFont);
+
+      // Attempts
+      UI.DrawTextLeft($"Attempts left: {MaxAttempts - currentAttempt}", new Vector2(width / 2 + (boxSize.X * MaxLength + spacing * (MaxLength - 1)) / 2 + 50, 150), 20, 1, Constants.MenuTextColor, customFont);
+
+      // Input handling
+      int keyPressed = GetKeyPressed();
+
+      if (keyPressed != 0)
+      {
+        char keyChar = (char)keyPressed;
+        bool isValidCode = Array.Exists(new char[] { 'R', 'G', 'B', 'O', 'C', 'A' }, c => c == Char.ToUpper(keyChar));
+        if (isValidCode)
+        {
+          userCodes[currentAttempt] += Char.ToUpper(keyChar);
+          if (userCodes[currentAttempt].Length == MaxLength)
+          {
+            currentAttempt++;
+
+            if (codeManager.GetFeedback(userCodes[currentAttempt - 1]) == "XXXX")
+            {
+              currentScreen = "victory";
+            }
+            else if (currentAttempt == MaxAttempts)
+            {
+              currentScreen = "defeat";
+            }
+
+            for (int i = 0; i < MaxAttempts; i++)
+            {
+              feedback[i] = codeManager.GetFeedback(userCodes[i]);
+            }
+          }
+        }
+        else if (keyPressed == (int)KeyboardKey.Backspace)
+        {
+          if (userCodes[currentAttempt].Length > 0)
+          {
+            userCodes[currentAttempt] = userCodes[currentAttempt].Substring(0, userCodes[currentAttempt].Length - 1);
+          }
+        }
+      }
     }
 
     static void DrawRulesScreen(Font customFont)
@@ -74,6 +193,32 @@ namespace COC
       UI.Button("Exit", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y + (menuButtonSize.Y + spacing) * 2, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => exitRequested = true);
     }
 
+    static void DrawVictoryScreen(Font customFont, CodeManager codeManager)
+    {
+      ClearBackground(Constants.BackgroundColor);
+
+      int width = GetScreenWidth();
+      int height = GetScreenHeight();
+
+      UI.DrawTextCentered("You won!", new Vector2(width / 2, 100), 50, 2, Constants.TitleColor, customFont);
+      UI.DrawTextCentered($"The code was: {codeManager.Code}", new Vector2(width / 2, 150), 30, 1, Constants.MenuTextColor, customFont);
+      UI.Button("Back to Menu", customFont, new Rectangle(width / 2 - 100, 200, 200, 50), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "menu"; resetRequested = true; });
+      UI.Button("Play Again", customFont, new Rectangle(width / 2 - 100, 260, 200, 50), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "game"; resetRequested = true; });
+    }
+
+    static void DrawDefeatScreen(Font customFont, CodeManager codeManager)
+    {
+      ClearBackground(Constants.BackgroundColor);
+
+      int width = GetScreenWidth();
+      int height = GetScreenHeight();
+
+      UI.DrawTextCentered("You lost!", new Vector2(width / 2, 100), 50, 2, Constants.TitleColor, customFont);
+      UI.DrawTextCentered($"The code was: {codeManager.Code}", new Vector2(width / 2, 150), 30, 1, Constants.MenuTextColor, customFont);
+      UI.Button("Back to Menu", customFont, new Rectangle(width / 2 - 100, 200, 200, 50), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "menu"; resetRequested = true; });
+      UI.Button("Play Again", customFont, new Rectangle(width / 2 - 100, 260, 200, 50), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { currentScreen = "game"; resetRequested = true; });
+    }
+
     static void RunGame()
     {
       SetConfigFlags(ConfigFlags.HighDpiWindow);
@@ -82,8 +227,33 @@ namespace COC
 
       Font customFont = LoadFont("resources/fonts/Poppins/Poppins-Regular.ttf");
 
+      string[] userCodes = new string[MaxAttempts];
+      string[] feedback = new string[MaxAttempts];
+      int currentAttempt = 0;
+
+      for (int i = 0; i < MaxAttempts; i++)
+      {
+        feedback[i] = "";
+        userCodes[i] = "";
+      }
+
+      CodeManager codeManager = new CodeManager(MaxLength);
+      codeManager.GenerateCode();
+
       while (!WindowShouldClose() && !exitRequested)
       {
+        if (resetRequested)
+        {
+          currentAttempt = 0;
+          for (int i = 0; i < MaxAttempts; i++)
+          {
+            feedback[i] = "";
+            userCodes[i] = "";
+          }
+          codeManager.GenerateCode();
+          resetRequested = false;
+        }
+
         BeginDrawing();
 
         switch (currentScreen)
@@ -92,10 +262,16 @@ namespace COC
             DrawMenuScreen(customFont);
             break;
           case "game":
-            DrawGameScreen(customFont);
+            DrawGameScreen(customFont, ref currentAttempt, ref userCodes, ref feedback, codeManager);
             break;
           case "rules":
             DrawRulesScreen(customFont);
+            break;
+          case "victory":
+            DrawVictoryScreen(customFont, codeManager);
+            break;
+          case "defeat":
+            DrawDefeatScreen(customFont, codeManager);
             break;
         }
 

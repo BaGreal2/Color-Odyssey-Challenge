@@ -31,7 +31,7 @@ namespace COC
       return new Color(r, g, b, color.A);
     }
 
-    public static void DrawRoundedRectangle(Rectangle rect, float roundness, int segments, Color color)
+    public static void RoundedRectangle(Rectangle rect, float roundness, int segments, Color color)
     {
       float radius = Math.Min(rect.Width, rect.Height) * roundness / 2;
 
@@ -44,7 +44,7 @@ namespace COC
       DrawCircleSector(new Vector2(rect.X + rect.Width - radius, rect.Y + rect.Height - radius), radius, 0, 90, segments, color); // Bottom-right
     }
 
-    public static void DrawTextCentered(string text, Vector2 position, float fontSize, float spacing, Color color, Font font)
+    public static void TextCentered(string text, Vector2 position, float fontSize, float spacing, Color color, Font font)
     {
       Vector2 textSize = MeasureTextEx(font, text, fontSize, spacing);
       Vector2 centeredPosition = position - textSize / 2;
@@ -52,7 +52,7 @@ namespace COC
       DrawTextEx(font, text, centeredPosition, fontSize, spacing, color);
     }
 
-    public static void DrawTextLeft(string text, Vector2 position, float fontSize, float spacing, Color color, Font font)
+    public static void TextLeft(string text, Vector2 position, float fontSize, float spacing, Color color, Font font)
     {
       DrawTextEx(font, text, position, fontSize, spacing, color);
     }
@@ -81,8 +81,8 @@ namespace COC
         callback();
       }
 
-      DrawRoundedRectangle(bounds, 0.2f, 10, currentColor);
-      DrawTextCentered(text, new Vector2(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2), 30, 2, textColor, font);
+      RoundedRectangle(bounds, 0.2f, 10, currentColor);
+      TextCentered(text, new Vector2(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2), 30, 2, textColor, font);
     }
   }
 }

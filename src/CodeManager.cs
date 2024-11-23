@@ -1,6 +1,6 @@
 namespace COC
 {
-  class CodeManager
+  public class CodeManager
   {
     char[] _colors = { 'R', 'G', 'B', 'O', 'C', 'A' };
     int _maxLength = 4;

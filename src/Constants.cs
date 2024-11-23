@@ -6,8 +6,12 @@ namespace COC
   {
     public const int WindowWidth = 800;
     public const int WindowHeight = 600;
+    public const string GameTitle = "COC";
 
     public const string StatsPath = "stats.txt";
+
+    public const int MaxAttempts = 6;
+    public const int MaxLength = 4;
 
     // #3E4E50
     // #FACFAD

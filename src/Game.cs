@@ -302,7 +302,7 @@ namespace COC
       UI.TextLeft("   C: Brown", textPosition + spacing * 5, 24, letterSpacing, Constants.Brown, customFont);
       UI.TextLeft("   A: Gray", textPosition + spacing * 6, 24, letterSpacing, Constants.Gray, customFont);
       UI.TextLeft("2. The player enters his code. The program informs the player:", textPosition + spacing * 7, 24, letterSpacing, Constants.MenuTextColor, customFont);
-      UI.TextLeft("   Yellow border: color matches but position does not match", textPosition + spacing * 8, 24, letterSpacing, Constants.Yellow, customFont);
+      UI.TextLeft("   Yellow border: color matches but position does not match.", textPosition + spacing * 8, 24, letterSpacing, Constants.Yellow, customFont);
       UI.TextLeft("   Green border: both color and position match.", textPosition + spacing * 9, 24, letterSpacing, Constants.Green, customFont);
       UI.TextLeft("3. If you get 4 green borders - you win.", textPosition + spacing * 10, 24, letterSpacing, Constants.MenuTextColor, customFont);
       UI.TextLeft("4. If you made a 6 attempt to guess the color code - you lose.", textPosition + spacing * 11, 24, letterSpacing, Constants.MenuTextColor, customFont);

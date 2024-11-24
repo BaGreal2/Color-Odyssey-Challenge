@@ -177,9 +177,9 @@ namespace COC
 
       UI.TextCentered("COLOR ODYSSEY CHALLENGE", new Vector2(width / 2, 100), 50, 2, Constants.TitleColor, customFont);
 
-      Vector2 menuButtonSize = new Vector2(200, 50);
-      Vector2 menuButtonPosition = new Vector2(width / 2 - (menuButtonSize.X) / 2, 200);
       int spacing = 10;
+      Vector2 menuButtonSize = new Vector2(200, 50);
+      Vector2 menuButtonPosition = new Vector2(width / 2 - (menuButtonSize.X) / 2, (height / 2) - menuButtonSize.Y * 2 - spacing * 2);
 
       UI.Button("Start Game", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => screenSetter("mode_select"));
       UI.Button("View Rules", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y + menuButtonSize.Y + spacing, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => screenSetter("rules"));
@@ -199,7 +199,8 @@ namespace COC
       // Boxes
       int spacing = 10;
       Vector2 boxSize = new Vector2(60, 60);
-      Vector2 boxPosition = new Vector2(width / 2 - (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2, 150);
+      float contentPositionY = height / 2 - (boxSize.Y * maxAttempts + spacing * (maxAttempts - 1)) / 2 + 50;
+      Vector2 boxPosition = new Vector2(width / 2 - (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2, contentPositionY);
 
       for (int i = 0; i < maxAttempts; i++)
       {
@@ -247,7 +248,7 @@ namespace COC
 
       // Color legend
       int legendSpacing = 24;
-      Vector2 colorLegendPosition = new Vector2(width / 2 - (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 - 150, 150);
+      Vector2 colorLegendPosition = new Vector2(width / 2 - (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 - 150, contentPositionY);
       UI.TextLeft("R: Red", new Vector2(colorLegendPosition.X, colorLegendPosition.Y), 25, 1, Constants.Red, customFont);
       UI.TextLeft("G: Green", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing), 25, 1, Constants.Green, customFont);
       UI.TextLeft("B: Blue", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing * 2), 25, 1, Constants.Blue, customFont);
@@ -256,7 +257,7 @@ namespace COC
       UI.TextLeft("A: Gray", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing * 5), 25, 1, Constants.Gray, customFont);
 
       // Attempts
-      UI.TextLeft($"Attempts left: {maxAttempts - currentAttempt}", new Vector2(width / 2 + (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 + 50, 150), 25, 1, Constants.MenuTextColor, customFont);
+      UI.TextLeft($"Attempts left: {maxAttempts - currentAttempt}", new Vector2(width / 2 + (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 + 50, contentPositionY), 25, 1, Constants.MenuTextColor, customFont);
 
       // Input handling
       int keyPressed = GetKeyPressed();
@@ -359,7 +360,6 @@ namespace COC
 
       UI.TextCentered("RULES", new Vector2(width / 2, 50), 50, 2, Constants.TitleColor, customFont);
 
-
       int leftMargin = 50;
       float letterSpacing = 1;
       Vector2 spacing = new Vector2(0, 24);
@@ -428,8 +428,8 @@ namespace COC
       int height = GetScreenHeight();
 
       UI.TextCentered("STATISTICS", new Vector2(width / 2, 50), 50, 2, Constants.TitleColor, customFont);
-      UI.TextCentered("Random mode stats", new Vector2(width / 2 - 200, 100), 30, 2, Constants.TitleColor, customFont);
-      UI.TextCentered("Daily mode stats", new Vector2(width / 2 + 200, 100), 30, 2, Constants.TitleColor, customFont);
+      UI.TextCentered("Random mode stats", new Vector2(width / 2 - width / 4, 100), 30, 2, Constants.TitleColor, customFont);
+      UI.TextCentered("Daily mode stats", new Vector2(width / 2 + width / 4, 100), 30, 2, Constants.TitleColor, customFont);
 
       string randomStats = ReadStats("random");
       string dailyStats = ReadStats("daily");

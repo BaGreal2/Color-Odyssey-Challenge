@@ -37,6 +37,7 @@ namespace COC
 
     static void Main(string[] args)
     {
+      SetConfigFlags(ConfigFlags.ResizableWindow);
       InitWindow(Constants.WindowWidth, Constants.WindowHeight, Constants.GameTitle);
       SetTargetFPS(60);
 

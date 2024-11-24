@@ -195,6 +195,7 @@ namespace COC
       int height = GetScreenHeight();
 
       UI.TextCentered("Enter colors from your keyboard!", new Vector2(width / 2, 80), 50, 2, Constants.TitleColor, customFont);
+      UI.Button("Back", customFont, new Rectangle(50, 80, 100, 40), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("menu"); resetSetter(true); });
 
       // Boxes
       int spacing = 10;
@@ -342,6 +343,7 @@ namespace COC
       int height = GetScreenHeight();
 
       UI.TextCentered("CHOOSE GAME MODE", new Vector2(width / 2, 100), 50, 2, Constants.TitleColor, customFont);
+      UI.Button("Back", customFont, new Rectangle(50, 80, 100, 40), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => screenSetter("menu"));
 
       int spacing = 10;
       Vector2 selectButtonSize = new Vector2(200, 50);

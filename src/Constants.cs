@@ -4,8 +4,8 @@ namespace COC
 {
   class Constants
   {
-    public const int WindowWidth = 800;
-    public const int WindowHeight = 600;
+    public const int WindowWidth = 1000;
+    public const int WindowHeight = 700;
     public const string GameTitle = "COC";
 
     public const string StatsPath = "stats.txt";

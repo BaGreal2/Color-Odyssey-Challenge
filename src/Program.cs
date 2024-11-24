@@ -47,6 +47,8 @@ namespace COC
 
       while (!WindowShouldClose() && !exitRequested)
       {
+        SetMouseCursor(MouseCursor.Default);
+
         if (resetRequested)
         {
           game.Reset();

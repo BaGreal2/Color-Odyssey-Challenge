@@ -75,7 +75,12 @@ namespace COC
         currentColor = activeColor;
       }
 
-      bool isClicked = isHovered && IsMouseButtonPressed(MouseButton.Left);
+      if (isHovered || isActive)
+      {
+        SetMouseCursor(MouseCursor.PointingHand);
+      }
+
+      bool isClicked = isHovered && IsMouseButtonReleased(MouseButton.Left);
       if (isClicked)
       {
         callback();

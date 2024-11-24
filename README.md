@@ -13,6 +13,12 @@ In daily mode sequence is generated based on the current date and player has onl
 
 Then, player also can view his stats in both mode to compare with friends 🙂
 
+## Screenshot
+
+Here's a screenshot of the game:
+
+![Screenshot of Color Odyssey Challenge](images/gameplay-screenshot.png)
+
 ## Building the project
 
 To build the project, you need [.NET](https://dotnet.microsoft.com/en-us/) 8.0+ installed.

@@ -1,3 +1,6 @@
+using System.Security.Cryptography;
+using System.Text;
+
 namespace COC
 {
   public class CodeManager
@@ -11,9 +14,30 @@ namespace COC
       _maxLength = length;
     }
 
-    public void GenerateCode()
+    static int GenerateStableSeed(string input)
     {
-      Random random = new Random();
+      using (SHA256 sha256 = SHA256.Create())
+      {
+        byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+        return BitConverter.ToInt32(hashBytes, 0);
+      }
+    }
+
+    public void GenerateCode(string mode)
+    {
+      Random random;
+      if (mode == "random")
+      {
+        random = new Random();
+      }
+      else
+      {
+        string currentDate = DateTime.Now.ToString("yyyyMMdd");
+        int seed = GenerateStableSeed(currentDate);
+        random = new Random(seed);
+      }
+
       string result = "";
 
       for (int i = 0; i < _maxLength; i++)

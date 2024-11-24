@@ -7,6 +7,7 @@ namespace COC
   class Program
   {
     static string currentScreen = "menu";
+    static string mode = "random";
     static bool exitRequested = false;
     static bool resetRequested = false;
 
@@ -40,10 +41,8 @@ namespace COC
       SetTargetFPS(60);
 
       Font customFont = LoadLocalFont("Poppins-Regular.ttf", 90);
-      Game game = new Game(customFont, (bool value) => resetRequested = value, (bool value) => exitRequested = value, (string screen) => currentScreen = screen, Constants.MaxAttempts, Constants.MaxLength);
-
       CodeManager codeManager = new CodeManager(Constants.MaxLength);
-      codeManager.GenerateCode();
+      Game game = new Game(customFont, (bool value) => resetRequested = value, (bool value) => exitRequested = value, (string screen) => currentScreen = screen, () => codeManager.GenerateCode(mode), Constants.MaxAttempts, Constants.MaxLength);
 
       while (!WindowShouldClose() && !exitRequested)
       {
@@ -52,7 +51,7 @@ namespace COC
         if (resetRequested)
         {
           game.Reset();
-          codeManager.GenerateCode();
+          codeManager.GenerateCode(mode);
         }
 
         BeginDrawing();
@@ -65,14 +64,17 @@ namespace COC
           case "game":
             game.GameScreen(codeManager);
             break;
+          case "mode_select":
+            game.ModeSelectScreen((string value) => mode = value);
+            break;
           case "rules":
             game.RulesScreen();
             break;
           case "victory":
-            game.VictoryScreen(codeManager);
+            game.VictoryScreen(codeManager, mode);
             break;
           case "defeat":
-            game.DefeatScreen(codeManager);
+            game.DefeatScreen(codeManager, mode);
             break;
           case "stats":
             game.StatsScreen();

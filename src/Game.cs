@@ -9,6 +9,7 @@ namespace COC
     Action<string> screenSetter;
     Action<bool> exitSetter;
     Action<bool> resetSetter;
+    Action gameInit;
 
     int maxLength;
     int maxAttempts;
@@ -19,7 +20,7 @@ namespace COC
 
     Font customFont;
 
-    public Game(Font _customFont, Action<bool> _resetSetter, Action<bool> _exitSetter, Action<string> _screenSetter, int _maxAttempts = 6, int _maxLength = 4)
+    public Game(Font _customFont, Action<bool> _resetSetter, Action<bool> _exitSetter, Action<string> _screenSetter, Action _gameInit, int _maxAttempts = 6, int _maxLength = 4)
     {
       screenSetter = _screenSetter;
       resetSetter = _resetSetter;
@@ -27,6 +28,7 @@ namespace COC
       maxLength = _maxLength;
       maxAttempts = _maxAttempts;
       customFont = _customFont;
+      gameInit = _gameInit;
       userCodes = new string[maxAttempts];
       feedback = new string[maxAttempts];
       for (int i = 0; i < maxAttempts; i++)
@@ -79,10 +81,18 @@ namespace COC
       return color;
     }
 
-    void SaveStat(bool isVictory, int attempts = 0)
+    void SaveStat(bool isVictory, string mode, int attempts = 0)
     {
-      string appDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MyGame");
-      string path = Path.Combine(appDirectory, Constants.StatsPath);
+      string appDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "COC");
+      string path;
+      if (mode == "random")
+      {
+        path = Path.Combine(appDirectory, Constants.StatsPath);
+      }
+      else
+      {
+        path = Path.Combine(appDirectory, Constants.DailyStatsPath);
+      }
       string stat = (isVictory ? "V" : "D") + attempts.ToString();
 
       try
@@ -107,10 +117,18 @@ namespace COC
       }
     }
 
-    public static string ReadStats()
+    public static string ReadStats(string mode)
     {
-      string appDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MyGame");
-      string path = Path.Combine(appDirectory, Constants.StatsPath);
+      string appDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "COC");
+      string path;
+      if (mode == "random")
+      {
+        path = Path.Combine(appDirectory, Constants.StatsPath);
+      }
+      else
+      {
+        path = Path.Combine(appDirectory, Constants.DailyStatsPath);
+      }
 
       try
       {
@@ -163,7 +181,7 @@ namespace COC
       Vector2 menuButtonPosition = new Vector2(width / 2 - (menuButtonSize.X) / 2, 200);
       int spacing = 10;
 
-      UI.Button("Start Game", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => screenSetter("game"));
+      UI.Button("Start Game", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => screenSetter("mode_select"));
       UI.Button("View Rules", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y + menuButtonSize.Y + spacing, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => screenSetter("rules"));
       UI.Button("View Stats", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y + (menuButtonSize.Y + spacing) * 2, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => screenSetter("stats"));
       UI.Button("Exit", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y + (menuButtonSize.Y + spacing) * 3, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => exitSetter(true));
@@ -279,6 +297,59 @@ namespace COC
       }
     }
 
+    static void SaveDailyDate()
+    {
+      string appDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "COC");
+      string path = Path.Combine(appDirectory, Constants.DailyPath);
+      string currentDate = DateTime.Now.ToString("yyyyMMdd");
+
+      try
+      {
+        if (!Directory.Exists(appDirectory))
+        {
+          Directory.CreateDirectory(appDirectory);
+        }
+
+        File.WriteAllText(path, currentDate);
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Error saving daily date: {ex.Message}");
+      }
+
+    }
+
+    static bool HasPlayedToday()
+    {
+      string appDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "COC");
+      string path = Path.Combine(appDirectory, Constants.DailyPath);
+      string currentDate = DateTime.Now.ToString("yyyyMMdd");
+
+      if (File.Exists(path))
+      {
+        string lastPlayed = File.ReadAllText(path);
+        return lastPlayed == currentDate;
+      }
+      return false;
+    }
+
+    public void ModeSelectScreen(Action<string> modeSetter)
+    {
+      ClearBackground(Constants.BackgroundColor);
+
+      int width = GetScreenWidth();
+      int height = GetScreenHeight();
+
+      UI.TextCentered("CHOOSE GAME MODE", new Vector2(width / 2, 100), 50, 2, Constants.TitleColor, customFont);
+
+      int spacing = 10;
+      Vector2 selectButtonSize = new Vector2(200, 50);
+      Vector2 selectButtonPosition = new Vector2(width / 2 - (selectButtonSize.X) / 2, (height / 2) - selectButtonSize.Y * 2);
+
+      UI.Button("Play Random", customFont, new Rectangle(selectButtonPosition.X, selectButtonPosition.Y, selectButtonSize.X, selectButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("game"); modeSetter("random"); gameInit(); });
+      UI.Button("Play Daily", customFont, new Rectangle(selectButtonPosition.X, selectButtonPosition.Y + selectButtonSize.Y + spacing, selectButtonSize.X, selectButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("game"); modeSetter("daily"); gameInit(); SaveDailyDate(); }, HasPlayedToday());
+    }
+
     public void RulesScreen()
     {
       ClearBackground(Constants.BackgroundColor);
@@ -313,7 +384,7 @@ namespace COC
       UI.Button("Back", customFont, new Rectangle(backButtonPosition.X, backButtonPosition.Y, backButtonSize.X, backButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => screenSetter("menu"));
     }
 
-    public void VictoryScreen(CodeManager codeManager)
+    public void VictoryScreen(CodeManager codeManager, string mode)
     {
       ClearBackground(Constants.BackgroundColor);
 
@@ -327,11 +398,11 @@ namespace COC
       Vector2 feedbackButtonSize = new Vector2(200, 50);
       Vector2 feedbackButtonPosition = new Vector2(width / 2 - (feedbackButtonSize.X) / 2, height - feedbackButtonSize.Y * 2 - 50 - spacing);
 
-      UI.Button("Back to Menu", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("menu"); resetSetter(true); SaveStat(true, currentAttempt); });
-      UI.Button("Play Again", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y + feedbackButtonSize.Y + spacing, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("game"); resetSetter(true); SaveStat(true, currentAttempt); });
+      UI.Button("Back to Menu", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("menu"); resetSetter(true); SaveStat(true, mode, currentAttempt); });
+      UI.Button("Play Again", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y + feedbackButtonSize.Y + spacing, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("game"); resetSetter(true); SaveStat(true, mode, currentAttempt); });
     }
 
-    public void DefeatScreen(CodeManager codeManager)
+    public void DefeatScreen(CodeManager codeManager, string mode)
     {
       ClearBackground(Constants.BackgroundColor);
 
@@ -345,8 +416,8 @@ namespace COC
       Vector2 feedbackButtonSize = new Vector2(200, 50);
       Vector2 feedbackButtonPosition = new Vector2(width / 2 - (feedbackButtonSize.X) / 2, height - feedbackButtonSize.Y * 2 - 50 - spacing);
 
-      UI.Button("Back to Menu", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("menu"); resetSetter(true); SaveStat(false); });
-      UI.Button("Play Again", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y + feedbackButtonSize.Y + spacing, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("game"); resetSetter(true); SaveStat(false); });
+      UI.Button("Back to Menu", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("menu"); resetSetter(true); SaveStat(false, mode); });
+      UI.Button("Play Again", customFont, new Rectangle(feedbackButtonPosition.X, feedbackButtonPosition.Y + feedbackButtonSize.Y + spacing, feedbackButtonSize.X, feedbackButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("game"); resetSetter(true); SaveStat(false, mode); });
     }
 
     public void StatsScreen()
@@ -357,9 +428,13 @@ namespace COC
       int height = GetScreenHeight();
 
       UI.TextCentered("STATISTICS", new Vector2(width / 2, 50), 50, 2, Constants.TitleColor, customFont);
+      UI.TextCentered("Random mode stats", new Vector2(width / 2 - 200, 100), 30, 2, Constants.TitleColor, customFont);
+      UI.TextCentered("Daily mode stats", new Vector2(width / 2 + 200, 100), 30, 2, Constants.TitleColor, customFont);
 
-      string stats = ReadStats();
-      UI.TextLeft(stats, new Vector2(50, 100), 24, 1, Constants.MenuTextColor, customFont);
+      string randomStats = ReadStats("random");
+      string dailyStats = ReadStats("daily");
+      UI.TextLeft(randomStats, new Vector2(50, 125), 24, 1, Constants.MenuTextColor, customFont);
+      UI.TextLeft(dailyStats, new Vector2((width / 2) + 50, 125), 24, 1, Constants.MenuTextColor, customFont);
 
       Vector2 backButtonSize = new Vector2(200, 50);
       Vector2 backButtonPosition = new Vector2(width / 2 - (backButtonSize.X) / 2, height - backButtonSize.Y - 50);

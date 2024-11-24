@@ -16,6 +16,11 @@ namespace COC
       return GetAdjustedColor(bgColor, 30);
     }
 
+    static Color GetDisabledColor(Color bgColor)
+    {
+      return GetAdjustedColor(bgColor, 50);
+    }
+
     static Color GetAdjustedColor(Color color, int adjustment)
     {
       int brightness = (color.R + color.G + color.B) / 3;
@@ -57,13 +62,14 @@ namespace COC
       DrawTextEx(font, text, position, fontSize, spacing, color);
     }
 
-    public static void Button(string text, Font font, Rectangle bounds, Color bgColor, Color textColor, Action callback)
+    public static void Button(string text, Font font, Rectangle bounds, Color bgColor, Color textColor, Action callback, bool isDisabled = false)
     {
       Vector2 mousePos = GetMousePosition();
-      bool isHovered = CheckCollisionPointRec(mousePos, bounds);
-      bool isActive = isHovered && IsMouseButtonDown(MouseButton.Left);
+      bool isHovered = CheckCollisionPointRec(mousePos, bounds) && !isDisabled;
+      bool isActive = isHovered && IsMouseButtonDown(MouseButton.Left) && !isDisabled;
       Color hoverColor = GetHoverColor(bgColor);
       Color activeColor = GetActiveColor(bgColor);
+      Color disabledColor = GetDisabledColor(bgColor);
 
       Color currentColor = bgColor;
       if (isHovered)
@@ -74,13 +80,17 @@ namespace COC
       {
         currentColor = activeColor;
       }
+      if (isDisabled)
+      {
+        currentColor = disabledColor;
+      }
 
       if (isHovered || isActive)
       {
         SetMouseCursor(MouseCursor.PointingHand);
       }
 
-      bool isClicked = isHovered && IsMouseButtonReleased(MouseButton.Left);
+      bool isClicked = isHovered && IsMouseButtonReleased(MouseButton.Left) && !isDisabled;
       if (isClicked)
       {
         callback();

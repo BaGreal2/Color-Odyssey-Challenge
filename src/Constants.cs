@@ -9,6 +9,8 @@ namespace COC
     public const string GameTitle = "COC";
 
     public const string StatsPath = "stats.txt";
+    public const string DailyStatsPath = "daily-stats.txt";
+    public const string DailyPath = "daily.txt";
 
     public const int MaxAttempts = 6;
     public const int MaxLength = 4;

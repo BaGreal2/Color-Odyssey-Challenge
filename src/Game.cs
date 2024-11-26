@@ -209,7 +209,8 @@ namespace COC
         {
           Vector2 oldSize = boxSize;
           Vector2 oldPosition = boxPosition;
-          int border = 6;
+          int border = 10;
+          int innerBorder = 2;
 
           if (feedback[i].Length > j)
           {
@@ -219,11 +220,13 @@ namespace COC
                 UI.RoundedRectangle(new Rectangle(boxPosition.X + (boxSize.X + spacing) * j, boxPosition.Y + (boxSize.Y + spacing) * i, boxSize.X, boxSize.Y), 0.2f, 20, Constants.Green);
                 boxSize = new Vector2(boxSize.X - border, boxSize.Y - border);
                 boxPosition = new Vector2(boxPosition.X + border / 2, boxPosition.Y + border / 2);
+                UI.RoundedRectangle(new Rectangle(boxPosition.X + (oldSize.X + spacing) * j - innerBorder / 2, boxPosition.Y + (oldSize.Y + spacing) * i - innerBorder / 2, boxSize.X + innerBorder, boxSize.Y + innerBorder), 0.2f, 20, Color.Black);
                 break;
               case 'Y':
                 UI.RoundedRectangle(new Rectangle(boxPosition.X + (boxSize.X + spacing) * j, boxPosition.Y + (boxSize.Y + spacing) * i, boxSize.X, boxSize.Y), 0.2f, 20, Constants.Yellow);
                 boxSize = new Vector2(boxSize.X - border, boxSize.Y - border);
                 boxPosition = new Vector2(boxPosition.X + border / 2, boxPosition.Y + border / 2);
+                UI.RoundedRectangle(new Rectangle(boxPosition.X + (oldSize.X + spacing) * j - innerBorder / 2, boxPosition.Y + (oldSize.Y + spacing) * i - innerBorder / 2, boxSize.X + innerBorder, boxSize.Y + innerBorder), 0.2f, 20, Color.Black);
                 break;
             }
           }
@@ -236,14 +239,13 @@ namespace COC
             bgColor.G -= 40;
             bgColor.B -= 40;
           }
-          UI.RoundedRectangle(new Rectangle(boxPosition.X + (oldSize.X + spacing) * j, boxPosition.Y + (oldSize.Y + spacing) * i, boxSize.X, boxSize.Y), 0.2f, 20, bgColor);
+
+          char charToDraw = userCodes[i].Length > j ? userCodes[i][j] : ' ';
+          Color elementColor = GetColorFromChar(charToDraw);
+          UI.RoundedRectangle(new Rectangle(boxPosition.X + (oldSize.X + spacing) * j, boxPosition.Y + (oldSize.Y + spacing) * i, boxSize.X, boxSize.Y), 0.2f, 20, charToDraw == ' ' ? bgColor : elementColor);
 
           boxSize = oldSize;
           boxPosition = oldPosition;
-
-          char charToDraw = userCodes[i].Length > j ? userCodes[i][j] : ' ';
-          Color textColor = GetColorFromChar(charToDraw);
-          UI.TextCentered(charToDraw.ToString(), new Vector2(boxPosition.X + (boxSize.X + spacing) * j + boxSize.X / 2, boxPosition.Y + (boxSize.Y + spacing) * i + boxSize.Y / 2), 35, 1, textColor, customFont);
         }
       }
 

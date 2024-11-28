@@ -187,6 +187,53 @@ namespace COC
       UI.Button("Exit", customFont, new Rectangle(menuButtonPosition.X, menuButtonPosition.Y + (menuButtonSize.Y + spacing) * 3, menuButtonSize.X, menuButtonSize.Y), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => exitSetter(true));
     }
 
+    void GetColorInput(char ch, ref string[] userCodes, ref CodeManager codeManager)
+    {
+      bool isValidCode = Array.Exists(new char[] { 'R', 'G', 'B', 'O', 'C', 'A' }, c => c == Char.ToUpper(ch));
+      if (isValidCode)
+      {
+        if (userCodes[currentAttempt].Length == maxLength)
+        {
+          return;
+        }
+        userCodes[currentAttempt] += Char.ToUpper(ch);
+      }
+    }
+
+    void HandleSubmit(ref string[] userCodes, ref CodeManager codeManager)
+    {
+      if (userCodes[currentAttempt].Length == maxLength)
+      {
+        currentAttempt++;
+
+        if (codeManager.GetFeedback(userCodes[currentAttempt - 1]) == "XXXX")
+        {
+          screenSetter("victory");
+        }
+        else if (currentAttempt == maxAttempts)
+        {
+          screenSetter("defeat");
+        }
+
+        for (int i = 0; i < maxAttempts; i++)
+        {
+          feedback[i] = codeManager.GetFeedback(userCodes[i]);
+        }
+      }
+    }
+
+    bool HasLetterBeenUsed(char ch, ref string[] userCodes, string code)
+    {
+      for(int i = 0; i < currentAttempt; i++)
+      {
+        if (userCodes[i].Contains(ch))
+        {
+          return !code.Contains(ch);
+        }
+      }
+      return false;
+    }
+
     public void GameScreen(CodeManager codeManager)
     {
       ClearBackground(Constants.BackgroundColor);
@@ -249,56 +296,37 @@ namespace COC
         }
       }
 
-      // Color legend
-      int legendSpacing = 24;
-      Vector2 colorLegendPosition = new Vector2(width / 2 - (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 - 150, contentPositionY);
-      UI.TextLeft("R: Red", new Vector2(colorLegendPosition.X, colorLegendPosition.Y), 25, 1, Constants.Red, customFont);
-      UI.TextLeft("G: Green", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing), 25, 1, Constants.Green, customFont);
-      UI.TextLeft("B: Blue", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing * 2), 25, 1, Constants.Blue, customFont);
-      UI.TextLeft("O: Orange", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing * 3), 25, 1, Constants.Orange, customFont);
-      UI.TextLeft("C: Brown", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing * 4), 25, 1, Constants.Brown, customFont);
-      UI.TextLeft("A: Gray", new Vector2(colorLegendPosition.X, colorLegendPosition.Y + legendSpacing * 5), 25, 1, Constants.Gray, customFont);
+      // Color buttons
+      int colorButtonSpacing = 16;
+      int colorButtonSize = 60;
+      Vector2 colorButtonPosition = new Vector2(width / 2 - (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 - colorButtonSize - spacing - 24, contentPositionY);
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y, colorButtonSize, colorButtonSize), Constants.Red, Constants.MenuTextColor, () => { GetColorInput('R', ref userCodes, ref codeManager); }, HasLetterBeenUsed('R', ref userCodes, codeManager.Code));
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + colorButtonSize + colorButtonSpacing, colorButtonSize, colorButtonSize), Constants.Green, Constants.MenuTextColor, () => { GetColorInput('G', ref userCodes, ref codeManager); }, HasLetterBeenUsed('G', ref userCodes, codeManager.Code));
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 2, colorButtonSize, colorButtonSize), Constants.Blue, Constants.MenuTextColor, () => { GetColorInput('B', ref userCodes, ref codeManager); }, HasLetterBeenUsed('B', ref userCodes, codeManager.Code));
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y, colorButtonSize, colorButtonSize), Constants.Orange, Constants.MenuTextColor, () => { GetColorInput('O', ref userCodes, ref codeManager); }, HasLetterBeenUsed('O', ref userCodes, codeManager.Code));
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + colorButtonSize + colorButtonSpacing, colorButtonSize, colorButtonSize), Constants.Brown, Constants.MenuTextColor, () => { GetColorInput('C', ref userCodes, ref codeManager); }, HasLetterBeenUsed('C', ref userCodes, codeManager.Code));
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 2, colorButtonSize, colorButtonSize), Constants.Gray, Constants.MenuTextColor, () => { GetColorInput('A', ref userCodes, ref codeManager); }, HasLetterBeenUsed('A', ref userCodes, codeManager.Code));
+      UI.Button("Sub", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize, colorButtonSize), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { HandleSubmit(ref userCodes, ref codeManager); });
+      UI.Button("<-", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize, colorButtonSize), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => userCodes[currentAttempt] = userCodes[currentAttempt].Substring(0, userCodes[currentAttempt].Length - 1), userCodes[currentAttempt].Length == 0);
 
       // Attempts
       UI.TextLeft($"Attempts left: {maxAttempts - currentAttempt}", new Vector2(width / 2 + (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 + 50, contentPositionY), 25, 1, Constants.MenuTextColor, customFont);
 
       // Input handling
-      int keyPressed = GetKeyPressed();
+      // int keyPressed = GetKeyPressed();
 
-      if (keyPressed != 0)
-      {
-        char keyChar = (char)keyPressed;
-        bool isValidCode = Array.Exists(new char[] { 'R', 'G', 'B', 'O', 'C', 'A' }, c => c == Char.ToUpper(keyChar));
-        if (isValidCode)
-        {
-          userCodes[currentAttempt] += Char.ToUpper(keyChar);
-          if (userCodes[currentAttempt].Length == maxLength)
-          {
-            currentAttempt++;
-
-            if (codeManager.GetFeedback(userCodes[currentAttempt - 1]) == "XXXX")
-            {
-              screenSetter("victory");
-            }
-            else if (currentAttempt == maxAttempts)
-            {
-              screenSetter("defeat");
-            }
-
-            for (int i = 0; i < maxAttempts; i++)
-            {
-              feedback[i] = codeManager.GetFeedback(userCodes[i]);
-            }
-          }
-        }
-        else if (keyPressed == (int)KeyboardKey.Backspace)
-        {
-          if (userCodes[currentAttempt].Length > 0)
-          {
-            userCodes[currentAttempt] = userCodes[currentAttempt].Substring(0, userCodes[currentAttempt].Length - 1);
-          }
-        }
-      }
+      // if (keyPressed != 0)
+      // {
+        // char keyChar = (char)keyPressed;
+        // GetColorInput(keyChar, ref userCodes, ref codeManager);
+        // if (keyPressed == (int)KeyboardKey.Backspace)
+        // {
+        //   if (userCodes[currentAttempt].Length > 0)
+        //   {
+        //     userCodes[currentAttempt] = userCodes[currentAttempt].Substring(0, userCodes[currentAttempt].Length - 1);
+        //   }
+        // }
+      // }
     }
 
     static void SaveDailyDate()

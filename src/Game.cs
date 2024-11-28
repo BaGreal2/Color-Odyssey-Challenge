@@ -411,7 +411,15 @@ namespace COC
       int height = GetScreenHeight();
 
       UI.TextCentered("You won!", new Vector2(width / 2, 100), 50, 2, Constants.TitleColor, customFont);
-      UI.TextCentered($"The code was: {codeManager.Code}", new Vector2(width / 2, 150), 30, 1, Constants.MenuTextColor, customFont);
+      UI.TextCentered("The code was:", new Vector2(width / 2, 150), 30, 1, Constants.MenuTextColor, customFont);
+
+      int boxSpacing = 12;
+      int boxSize = 60;
+      Vector2 colorCodePosition = new Vector2(width / 2 - (boxSize * maxLength / 2) - (boxSpacing * ((maxLength / 2) - 1)), 180);
+      for (int i = 0; i < maxLength; i++)
+      {
+        UI.RoundedRectangle(new Rectangle(colorCodePosition.X + (boxSize + boxSpacing) * i, colorCodePosition.Y, boxSize, boxSize), 0.2f, 10, GetColorFromChar(codeManager.Code[i]));
+      }
 
       int spacing = 20;
       Vector2 feedbackButtonSize = new Vector2(200, 50);
@@ -429,7 +437,15 @@ namespace COC
       int height = GetScreenHeight();
 
       UI.TextCentered("You lost!", new Vector2(width / 2, 100), 50, 2, Constants.TitleColor, customFont);
-      UI.TextCentered($"The code was: {codeManager.Code}", new Vector2(width / 2, 150), 30, 1, Constants.MenuTextColor, customFont);
+      UI.TextCentered("The code was:", new Vector2(width / 2, 150), 30, 1, Constants.MenuTextColor, customFont);
+
+      int boxSpacing = 12;
+      int boxSize = 60;
+      Vector2 colorCodePosition = new Vector2(width / 2 - (boxSize * maxLength / 2) - (boxSpacing * ((maxLength / 2) - 1)), 180);
+      for (int i = 0; i < maxLength; i++)
+      {
+        UI.RoundedRectangle(new Rectangle(colorCodePosition.X + (boxSize + boxSpacing) * i, colorCodePosition.Y, boxSize, boxSize), 0.2f, 10, GetColorFromChar(codeManager.Code[i]));
+      }
 
       int spacing = 20;
       Vector2 feedbackButtonSize = new Vector2(200, 50);

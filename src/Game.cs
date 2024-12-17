@@ -224,7 +224,7 @@ namespace COC
 
     bool HasLetterBeenUsed(char ch, ref string[] userCodes, string code)
     {
-      for(int i = 0; i < currentAttempt; i++)
+      for (int i = 0; i < currentAttempt; i++)
       {
         if (userCodes[i].Contains(ch))
         {
@@ -309,24 +309,7 @@ namespace COC
       UI.Button("Sub", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize, colorButtonSize), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { HandleSubmit(ref userCodes, ref codeManager); });
       UI.Button("<-", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize, colorButtonSize), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => userCodes[currentAttempt] = userCodes[currentAttempt].Substring(0, userCodes[currentAttempt].Length - 1), userCodes[currentAttempt].Length == 0);
 
-      // Attempts
       UI.TextLeft($"Attempts left: {maxAttempts - currentAttempt}", new Vector2(width / 2 + (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 + 50, contentPositionY), 25, 1, Constants.MenuTextColor, customFont);
-
-      // Input handling
-      // int keyPressed = GetKeyPressed();
-
-      // if (keyPressed != 0)
-      // {
-        // char keyChar = (char)keyPressed;
-        // GetColorInput(keyChar, ref userCodes, ref codeManager);
-        // if (keyPressed == (int)KeyboardKey.Backspace)
-        // {
-        //   if (userCodes[currentAttempt].Length > 0)
-        //   {
-        //     userCodes[currentAttempt] = userCodes[currentAttempt].Substring(0, userCodes[currentAttempt].Length - 1);
-        //   }
-        // }
-      // }
     }
 
     static void SaveDailyDate()
@@ -392,23 +375,27 @@ namespace COC
 
       UI.TextCentered("RULES", new Vector2(width / 2, 50), 50, 2, Constants.TitleColor, customFont);
 
-      int leftMargin = 50;
-      float letterSpacing = 1;
-      Vector2 spacing = new Vector2(0, 24);
-      Vector2 textPosition = new Vector2(leftMargin, 100);
-
-      UI.TextLeft("1. The program draws the codes of four colors chosen from among six:", textPosition, 24, letterSpacing, Constants.MenuTextColor, customFont);
-      UI.TextLeft("   R: Red", textPosition + spacing, 24, letterSpacing, Constants.Red, customFont);
-      UI.TextLeft("   G: Green", textPosition + spacing * 2, 24, letterSpacing, Constants.Green, customFont);
-      UI.TextLeft("   B: Blue", textPosition + spacing * 3, 24, letterSpacing, Constants.Blue, customFont);
-      UI.TextLeft("   O: Orange", textPosition + spacing * 4, 24, letterSpacing, Constants.Orange, customFont);
-      UI.TextLeft("   C: Brown", textPosition + spacing * 5, 24, letterSpacing, Constants.Brown, customFont);
-      UI.TextLeft("   A: Gray", textPosition + spacing * 6, 24, letterSpacing, Constants.Gray, customFont);
-      UI.TextLeft("2. The player enters his code. The program informs the player:", textPosition + spacing * 7, 24, letterSpacing, Constants.MenuTextColor, customFont);
-      UI.TextLeft("   Yellow border: color matches but position does not match.", textPosition + spacing * 8, 24, letterSpacing, Constants.Yellow, customFont);
-      UI.TextLeft("   Green border: both color and position match.", textPosition + spacing * 9, 24, letterSpacing, Constants.Green, customFont);
-      UI.TextLeft("3. If you get 4 green borders - you win.", textPosition + spacing * 10, 24, letterSpacing, Constants.MenuTextColor, customFont);
-      UI.TextLeft("4. If you made a 6 attempt to guess the color code - you lose.", textPosition + spacing * 11, 24, letterSpacing, Constants.MenuTextColor, customFont);
+      UI.List(
+          new ListText[] {
+            new ListText("1. The program draws the codes of four colors chosen from among six:", Constants.MenuTextColor),
+            new ListText("   R: Red", Constants.Red),
+            new ListText("   G: Green", Constants.Green),
+            new ListText("   B: Blue", Constants.Blue),
+            new ListText("   O: Orange", Constants.Orange),
+            new ListText("   C: Brown", Constants.Brown),
+            new ListText("   A: Gray", Constants.Gray),
+            new ListText("2. The player enters his code. The program informs the player:", Constants.MenuTextColor),
+            new ListText("   Yellow border: color matches but position does not match.", Constants.Yellow),
+            new ListText("   Green border: both color and position match.", Constants.Green),
+            new ListText("3. If you get 4 green borders - you win.", Constants.MenuTextColor),
+            new ListText("4. If you made a 6 attempt to guess the color code - you lose.", Constants.MenuTextColor)
+          },
+          new Vector2(50, 100),
+          new Vector2(0, 24),
+          24,
+          1,
+          customFont
+      );
 
       Vector2 backButtonSize = new Vector2(200, 50);
       Vector2 backButtonPosition = new Vector2(width / 2 - (backButtonSize.X) / 2, height - backButtonSize.Y - 50);

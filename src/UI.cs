@@ -29,7 +29,7 @@ namespace COC
 
     static Color GetDisabledColor(Color bgColor)
     {
-      return GetAdjustedColor(bgColor, 50);
+      return GetAdjustedColor(bgColor, -50);
     }
 
     static Color GetAdjustedColor(Color color, int adjustment)

@@ -141,7 +141,12 @@ namespace COC
             return "";
           }
 
-          return $"Victories: {victories}\n\nDefeats: {defeats}\n\nAverage attempts to win: {totalAttempts / (float)victories}";
+          float avgAttempts = totalAttempts / (float)victories;
+          float avgAttemptsPrecision = (float)Math.Round(avgAttempts, 2);
+          float winRate = (victories / (float)stats.Length) * 100;
+          float winRatePrecision = (float)Math.Round(winRate, 2);
+
+          return $"Victories: {victories}\n\nDefeats: {defeats}\n\nAverage attempts to win: {avgAttemptsPrecision}\n\nWin rate: {winRatePrecision}%";
         }
       }
       catch (Exception ex)
@@ -233,8 +238,45 @@ namespace COC
       UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y, colorButtonSize, colorButtonSize), Constants.Orange, Constants.MenuTextColor, () => { GetColorInput('O', ref userCodes, ref codeManager); }, HasLetterBeenUsed('O', ref userCodes, codeManager.Code));
       UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + colorButtonSize + colorButtonSpacing, colorButtonSize, colorButtonSize), Constants.Brown, Constants.MenuTextColor, () => { GetColorInput('C', ref userCodes, ref codeManager); }, HasLetterBeenUsed('C', ref userCodes, codeManager.Code));
       UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 2, colorButtonSize, colorButtonSize), Constants.Gray, Constants.MenuTextColor, () => { GetColorInput('A', ref userCodes, ref codeManager); }, HasLetterBeenUsed('A', ref userCodes, codeManager.Code));
-      UI.Button("Sub", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize, colorButtonSize), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { HandleSubmit(ref userCodes, ref codeManager); });
-      UI.Button("<-", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize, colorButtonSize), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => userCodes[currentAttempt] = userCodes[currentAttempt].Substring(0, userCodes[currentAttempt].Length - 1), userCodes[currentAttempt].Length == 0);
+      UI.Button("Confirm", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize * 2 + colorButtonSpacing, colorButtonSize / 1.5f), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { HandleSubmit(ref userCodes, ref codeManager); });
+
+      int attempt = Math.Min(currentAttempt, Constants.MaxAttempts - 1);
+      UI.Button("<", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3 + colorButtonSize / 1.5f + 10, colorButtonSize * 2 + colorButtonSpacing, colorButtonSize / 1.5f), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => userCodes[attempt] = userCodes[attempt].Substring(0, userCodes[attempt].Length - 1), userCodes[attempt].Length == 0);
+    }
+
+    void DrawCrosses(Vector2 boxSize, float spacing, float contentPositionY, CodeManager codeManager)
+    {
+      int width = GetScreenWidth();
+      int height = GetScreenHeight();
+
+      int colorButtonSpacing = 16;
+      int colorButtonSize = 60;
+      Vector2 colorButtonPosition = new Vector2(width / 2 - (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 - colorButtonSize - spacing - 24, contentPositionY);
+
+      if (HasLetterBeenUsed('R', ref userCodes, codeManager.Code))
+      {
+        UI.Cross(new Vector2(colorButtonPosition.X + colorButtonSize / 2, colorButtonPosition.Y + colorButtonSize / 2), 20, Constants.Gray);
+      }
+      if (HasLetterBeenUsed('G', ref userCodes, codeManager.Code))
+      {
+        UI.Cross(new Vector2(colorButtonPosition.X + colorButtonSize / 2, colorButtonPosition.Y + colorButtonSize + colorButtonSpacing + colorButtonSize / 2), 20, Constants.Gray);
+      }
+      if (HasLetterBeenUsed('B', ref userCodes, codeManager.Code))
+      {
+        UI.Cross(new Vector2(colorButtonPosition.X + colorButtonSize / 2, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 2 + colorButtonSize / 2), 20, Constants.Gray);
+      }
+      if (HasLetterBeenUsed('O', ref userCodes, codeManager.Code))
+      {
+        UI.Cross(new Vector2(colorButtonPosition.X - colorButtonSize - colorButtonSpacing + colorButtonSize / 2, colorButtonPosition.Y + colorButtonSize / 2), 20, Constants.Gray);
+      }
+      if (HasLetterBeenUsed('C', ref userCodes, codeManager.Code))
+      {
+        UI.Cross(new Vector2(colorButtonPosition.X - colorButtonSize - colorButtonSpacing + colorButtonSize / 2, colorButtonPosition.Y + colorButtonSize + colorButtonSpacing + colorButtonSize / 2), 20, Constants.Gray);
+      }
+      if (HasLetterBeenUsed('A', ref userCodes, codeManager.Code))
+      {
+        UI.Cross(new Vector2(colorButtonPosition.X - colorButtonSize - colorButtonSpacing + colorButtonSize / 2, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 2 + colorButtonSize / 2), 20, Constants.Gray);
+      }
     }
 
     public void GameScreen(CodeManager codeManager)
@@ -244,7 +286,7 @@ namespace COC
       int width = GetScreenWidth();
       int height = GetScreenHeight();
 
-      UI.TextCentered("Enter colors from your keyboard!", new Vector2(width / 2, 80), 50, 2, Constants.TitleColor, customFont);
+      UI.TextCentered("Enter colors with your mouse", new Vector2(width / 2, 100), 50, 2, Constants.TitleColor, customFont);
       UI.Button("Back", customFont, new Rectangle(50, 80, 100, 40), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("menu"); resetSetter(true); });
 
       int spacing = 10;
@@ -300,6 +342,7 @@ namespace COC
 
       UI.TextLeft($"Attempts left: {maxAttempts - currentAttempt}", new Vector2(width / 2 + (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 + 50, contentPositionY), 25, 1, Constants.MenuTextColor, customFont);
       DrawColorButtons(boxSize, spacing, contentPositionY, codeManager);
+      DrawCrosses(boxSize, spacing, contentPositionY, codeManager);
     }
 
     static void SaveDailyDate()
@@ -367,12 +410,12 @@ namespace COC
       UIKit.List(
           new ListText[] {
             new ListText("1. The program draws the codes of four colors chosen from among six:", Constants.MenuTextColor),
-            new ListText("   R: Red", Constants.Red),
-            new ListText("   G: Green", Constants.Green),
-            new ListText("   B: Blue", Constants.Blue),
-            new ListText("   O: Orange", Constants.Orange),
-            new ListText("   C: Brown", Constants.Brown),
-            new ListText("   A: Gray", Constants.Gray),
+            new ListText("   Red", Constants.Red),
+            new ListText("   Green", Constants.Green),
+            new ListText("   Blue", Constants.Blue),
+            new ListText("   Orange", Constants.Orange),
+            new ListText("   Brown", Constants.Brown),
+            new ListText("   Gray", Constants.Gray),
             new ListText("2. The player enters his code. The program informs the player:", Constants.MenuTextColor),
             new ListText("   Yellow border: color matches but position does not match.", Constants.Yellow),
             new ListText("   Green border: both color and position match.", Constants.Green),

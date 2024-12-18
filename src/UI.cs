@@ -18,7 +18,7 @@ namespace COC
 
     static Color GetDisabledColor(Color bgColor)
     {
-      return GetAdjustedColor(bgColor, -50);
+      return GetAdjustedColor(bgColor, 40);
     }
 
     static Color GetAdjustedColor(Color color, int adjustment)
@@ -98,6 +98,12 @@ namespace COC
 
       RoundedRectangle(bounds, 0.2f, 10, currentColor);
       TextCentered(text, new Vector2(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2), 30, 2, textColor, font);
+    }
+
+    public static void Cross(Vector2 position, float size, Color color)
+    {
+      DrawLineEx(new Vector2((position.X - size), (position.Y - size)), new Vector2((position.X + size), (position.Y + size)), size / 5, color);
+      DrawLineEx(new Vector2((position.X + size), (position.Y - size)), new Vector2((position.X - size), (position.Y + size)), size / 5, color);
     }
   }
 }

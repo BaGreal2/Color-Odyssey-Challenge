@@ -20,6 +20,17 @@ namespace COC
 
     Font customFont;
 
+    private static readonly Dictionary<char, Color> ColorMap = new()
+    {
+      { 'R', Constants.Red },
+        { 'G', Constants.Green },
+        { 'B', Constants.Blue },
+        { 'O', Constants.Orange },
+        { 'C', Constants.Brown },
+        { 'A', Constants.Gray }
+    };
+
+
     public Game(Font _customFont, Action<bool> _resetSetter, Action<bool> _exitSetter, Action<string> _screenSetter, Action _gameInit, int _maxAttempts = 6, int _maxLength = 4)
     {
       screenSetter = _screenSetter;
@@ -51,34 +62,7 @@ namespace COC
 
     Color GetColorFromChar(char c)
     {
-      Color color;
-
-      switch (c)
-      {
-        case 'R':
-          color = Constants.Red;
-          break;
-        case 'G':
-          color = Constants.Green;
-          break;
-        case 'B':
-          color = Constants.Blue;
-          break;
-        case 'O':
-          color = Constants.Orange;
-          break;
-        case 'C':
-          color = Constants.Brown;
-          break;
-        case 'A':
-          color = Constants.Gray;
-          break;
-        default:
-          color = Color.Black;
-          break;
-      }
-
-      return color;
+      return ColorMap.TryGetValue(c, out var color) ? color : Color.Black;
     }
 
     void SaveStat(bool isVictory, string mode, int attempts = 0)
@@ -234,6 +218,25 @@ namespace COC
       return false;
     }
 
+    void DrawColorButtons(Vector2 boxSize, float spacing, float contentPositionY, CodeManager codeManager)
+    {
+      int width = GetScreenWidth();
+      int height = GetScreenHeight();
+
+      int colorButtonSpacing = 16;
+      int colorButtonSize = 60;
+      Vector2 colorButtonPosition = new Vector2(width / 2 - (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 - colorButtonSize - spacing - 24, contentPositionY);
+
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y, colorButtonSize, colorButtonSize), Constants.Red, Constants.MenuTextColor, () => { GetColorInput('R', ref userCodes, ref codeManager); }, HasLetterBeenUsed('R', ref userCodes, codeManager.Code));
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + colorButtonSize + colorButtonSpacing, colorButtonSize, colorButtonSize), Constants.Green, Constants.MenuTextColor, () => { GetColorInput('G', ref userCodes, ref codeManager); }, HasLetterBeenUsed('G', ref userCodes, codeManager.Code));
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 2, colorButtonSize, colorButtonSize), Constants.Blue, Constants.MenuTextColor, () => { GetColorInput('B', ref userCodes, ref codeManager); }, HasLetterBeenUsed('B', ref userCodes, codeManager.Code));
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y, colorButtonSize, colorButtonSize), Constants.Orange, Constants.MenuTextColor, () => { GetColorInput('O', ref userCodes, ref codeManager); }, HasLetterBeenUsed('O', ref userCodes, codeManager.Code));
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + colorButtonSize + colorButtonSpacing, colorButtonSize, colorButtonSize), Constants.Brown, Constants.MenuTextColor, () => { GetColorInput('C', ref userCodes, ref codeManager); }, HasLetterBeenUsed('C', ref userCodes, codeManager.Code));
+      UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 2, colorButtonSize, colorButtonSize), Constants.Gray, Constants.MenuTextColor, () => { GetColorInput('A', ref userCodes, ref codeManager); }, HasLetterBeenUsed('A', ref userCodes, codeManager.Code));
+      UI.Button("Sub", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize, colorButtonSize), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { HandleSubmit(ref userCodes, ref codeManager); });
+      UI.Button("<-", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize, colorButtonSize), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => userCodes[currentAttempt] = userCodes[currentAttempt].Substring(0, userCodes[currentAttempt].Length - 1), userCodes[currentAttempt].Length == 0);
+    }
+
     public void GameScreen(CodeManager codeManager)
     {
       ClearBackground(Constants.BackgroundColor);
@@ -244,7 +247,6 @@ namespace COC
       UI.TextCentered("Enter colors from your keyboard!", new Vector2(width / 2, 80), 50, 2, Constants.TitleColor, customFont);
       UI.Button("Back", customFont, new Rectangle(50, 80, 100, 40), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { screenSetter("menu"); resetSetter(true); });
 
-      // Boxes
       int spacing = 10;
       Vector2 boxSize = new Vector2(60, 60);
       float contentPositionY = height / 2 - (boxSize.Y * maxAttempts + spacing * (maxAttempts - 1)) / 2 + 50;
@@ -296,20 +298,8 @@ namespace COC
         }
       }
 
-      // Color buttons
-      int colorButtonSpacing = 16;
-      int colorButtonSize = 60;
-      Vector2 colorButtonPosition = new Vector2(width / 2 - (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 - colorButtonSize - spacing - 24, contentPositionY);
-      UI.Button("", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y, colorButtonSize, colorButtonSize), Constants.Red, Constants.MenuTextColor, () => { GetColorInput('R', ref userCodes, ref codeManager); }, HasLetterBeenUsed('R', ref userCodes, codeManager.Code));
-      UI.Button("", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + colorButtonSize + colorButtonSpacing, colorButtonSize, colorButtonSize), Constants.Green, Constants.MenuTextColor, () => { GetColorInput('G', ref userCodes, ref codeManager); }, HasLetterBeenUsed('G', ref userCodes, codeManager.Code));
-      UI.Button("", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 2, colorButtonSize, colorButtonSize), Constants.Blue, Constants.MenuTextColor, () => { GetColorInput('B', ref userCodes, ref codeManager); }, HasLetterBeenUsed('B', ref userCodes, codeManager.Code));
-      UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y, colorButtonSize, colorButtonSize), Constants.Orange, Constants.MenuTextColor, () => { GetColorInput('O', ref userCodes, ref codeManager); }, HasLetterBeenUsed('O', ref userCodes, codeManager.Code));
-      UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + colorButtonSize + colorButtonSpacing, colorButtonSize, colorButtonSize), Constants.Brown, Constants.MenuTextColor, () => { GetColorInput('C', ref userCodes, ref codeManager); }, HasLetterBeenUsed('C', ref userCodes, codeManager.Code));
-      UI.Button("", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 2, colorButtonSize, colorButtonSize), Constants.Gray, Constants.MenuTextColor, () => { GetColorInput('A', ref userCodes, ref codeManager); }, HasLetterBeenUsed('A', ref userCodes, codeManager.Code));
-      UI.Button("Sub", customFont, new Rectangle(colorButtonPosition.X - colorButtonSize - colorButtonSpacing, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize, colorButtonSize), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => { HandleSubmit(ref userCodes, ref codeManager); });
-      UI.Button("<-", customFont, new Rectangle(colorButtonPosition.X, colorButtonPosition.Y + (colorButtonSize + colorButtonSpacing) * 3, colorButtonSize, colorButtonSize), Constants.MenuButtonColor, Constants.MenuButtonTextColor, () => userCodes[currentAttempt] = userCodes[currentAttempt].Substring(0, userCodes[currentAttempt].Length - 1), userCodes[currentAttempt].Length == 0);
-
       UI.TextLeft($"Attempts left: {maxAttempts - currentAttempt}", new Vector2(width / 2 + (boxSize.X * maxLength + spacing * (maxLength - 1)) / 2 + 50, contentPositionY), 25, 1, Constants.MenuTextColor, customFont);
+      DrawColorButtons(boxSize, spacing, contentPositionY, codeManager);
     }
 
     static void SaveDailyDate()
@@ -342,8 +332,7 @@ namespace COC
 
       if (File.Exists(path))
       {
-        string lastPlayed = File.ReadAllText(path);
-        return lastPlayed == currentDate;
+        return File.ReadAllText(path) == currentDate;
       }
       return false;
     }
@@ -375,7 +364,7 @@ namespace COC
 
       UI.TextCentered("RULES", new Vector2(width / 2, 50), 50, 2, Constants.TitleColor, customFont);
 
-      UI.List(
+      UIKit.List(
           new ListText[] {
             new ListText("1. The program draws the codes of four colors chosen from among six:", Constants.MenuTextColor),
             new ListText("   R: Red", Constants.Red),

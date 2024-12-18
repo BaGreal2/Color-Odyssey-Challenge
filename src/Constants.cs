@@ -6,7 +6,7 @@ namespace COC
   {
     public const int WindowWidth = 1000;
     public const int WindowHeight = 700;
-    public const string GameTitle = "COC";
+    public const string GameTitle = "Color Odyssey Challenge";
 
     public const string StatsPath = "stats.txt";
     public const string DailyStatsPath = "daily-stats.txt";

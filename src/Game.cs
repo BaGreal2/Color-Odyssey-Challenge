@@ -22,7 +22,7 @@ namespace COC
 
     private static readonly Dictionary<char, Color> ColorMap = new()
     {
-      { 'R', Constants.Red },
+        { 'R', Constants.Red },
         { 'G', Constants.Green },
         { 'B', Constants.Blue },
         { 'O', Constants.Orange },

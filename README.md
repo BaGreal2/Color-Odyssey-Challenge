@@ -11,7 +11,7 @@ COC also has 2 modes:
 
 In daily mode sequence is generated based on the current date and player has only one chance at trying this sequence.
 
-Then, player also can view his stats in both mode to compare with friends 🙂
+Then, player also can view his stats in both modes to compare with friends 🙂
 
 ## Screenshot
 
